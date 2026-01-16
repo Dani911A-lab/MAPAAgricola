@@ -39,6 +39,8 @@ function resizeCanvas(){
     c.height = rect.height;
     c.style.width = rect.width + "px";
     c.style.height = rect.height + "px";
+
+    // IMPORTANTE: anclar al wrapper
     c.style.top = "0px";
     c.style.left = "0px";
   });
@@ -66,10 +68,12 @@ function toggleTool(selectedTool, btn){
   addingText = false;
 }
 
+// Botones toggle
 penBtn.addEventListener("click", ()=> toggleTool("pen", penBtn));
 markerBtn.addEventListener("click", ()=> toggleTool("marker", markerBtn));
 eraserBtn.addEventListener("click", ()=> toggleTool("eraser", eraserBtn));
 
+// Texto independiente
 textBtn.addEventListener("click", ()=>{
   tool = "text";
   addingText = true;
@@ -107,12 +111,7 @@ function getTextAt(p){
 
 function getHandleAt(p, box){
   const s = 8;
-  const corners = {
-    tl:{x:box.x,y:box.y},
-    tr:{x:box.x+box.w,y:box.y},
-    bl:{x:box.x,y:box.y+box.h},
-    br:{x:box.x+box.w,y:box.y+box.h}
-  };
+  const corners = { tl:{x:box.x,y:box.y}, tr:{x:box.x+box.w,y:box.y}, bl:{x:box.x,y:box.y+box.h}, br:{x:box.x+box.w,y:box.y+box.h} };
   for(const k in corners){
     const c = corners[k];
     if(Math.abs(p.x-c.x)<s && Math.abs(p.y-c.y)<s) return k;
@@ -135,9 +134,11 @@ function getHandleAt(p, box){
 function start(e){
   const p = getPos(e);
 
-  if(tool === "eraser"){
-    drawEraserPreview(p);
-  }
+  // Vista previa del borrador
+if(tool === "eraser" && !drawing){
+  drawEraserPreview(p);
+}
+
 
   if(tool === "text"){
     const hit = getTextAt(p);
@@ -181,10 +182,6 @@ function start(e){
 // ================= MOVE =================
 function move(e){
   const p = getPos(e);
-
-  if(tool === "eraser"){
-    drawEraserPreview(p);
-  }
 
   if(activeText){
     if(resizing && resizeCorner){
@@ -262,8 +259,21 @@ function end(){
   draggingText = false;
   resizeCorner = null;
   ctxDraw.globalCompositeOperation="source-over";
+}
+
+// ================= DIBUJAR TEXTO =================
+function end(){
+  drawing = false;
+  resizing = false;
+  draggingText = false;
+  resizeCorner = null;
+
+  ctxDraw.globalCompositeOperation="source-over";
+
+  // Limpiar preview del borrador
   redrawTextCanvas();
 }
+
 
 // ================= REDRAW =================
 function redrawTextCanvas(){
@@ -306,19 +316,67 @@ function limitOffsets(){
   offsetY = Math.min(maxY, Math.max(-maxY, offsetY));
 }
 
-// ================= PREVIEW BORRADOR =================
+mapWrapper.addEventListener("touchstart", e=>{
+  if(e.touches.length === 2){
+    lastDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    tool = null;
+    isDrawingToolActive = false;
+    [penBtn, markerBtn, eraserBtn].forEach(b=>b.classList.remove("active"));
+  } else if(e.touches.length === 1 && scale > 1 && !isDrawingToolActive){
+    lastPan = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  }
+}, {passive:false});
+
+mapWrapper.addEventListener("touchmove", e=>{
+  if(e.touches.length === 2){
+    e.preventDefault();
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    if(lastDist){
+      let factor = dist / lastDist;
+      scale *= factor;
+      scale = Math.min(Math.max(scale, 1), 4);
+      limitOffsets();
+      applyTransform();
+    }
+    lastDist = dist;
+  } else if(e.touches.length === 1 && scale > 1 && lastPan && !isDrawingToolActive){
+    e.preventDefault();
+    const dx = e.touches[0].clientX - lastPan.x;
+    const dy = e.touches[0].clientY - lastPan.y;
+    offsetX += dx;
+    offsetY += dy;
+    limitOffsets();
+    applyTransform();
+    lastPan.x = e.touches[0].clientX;
+    lastPan.y = e.touches[0].clientY;
+  }
+}, {passive:false});
+
+mapWrapper.addEventListener("touchend", e=>{
+  if(e.touches.length < 2) lastDist = null;
+  if(e.touches.length === 0) lastPan = null;
+});
+
 function drawEraserPreview(p){
   ctxText.clearRect(0,0,canvasText.width,canvasText.height);
-  redrawTextCanvas();
+
+  redrawTextCanvas(); // mantiene textos visibles
 
   const s = Number(sizeInput.value);
 
   ctxText.save();
   ctxText.beginPath();
   ctxText.arc(p.x, p.y, s/2, 0, Math.PI*2);
-  ctxText.strokeStyle = "rgba(30,136,229,0.9)";
+  ctxText.strokeStyle = "rgba(30,136,229,0.8)";
   ctxText.lineWidth = 1;
-  ctxText.setLineDash([6,6]);
+  ctxText.setLineDash([4,4]);
   ctxText.stroke();
   ctxText.restore();
 }
+
