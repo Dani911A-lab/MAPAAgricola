@@ -37,12 +37,15 @@ function resizeCanvas(){
   [canvasDraw, canvasText].forEach(c=>{
     c.width = rect.width;
     c.height = rect.height;
-    c.style.width = rect.width+"px";
-    c.style.height = rect.height+"px";
-    c.style.top = rect.top+"px";
-    c.style.left = rect.left+"px";
+    c.style.width = rect.width + "px";
+    c.style.height = rect.height + "px";
+
+    // IMPORTANTE: anclar al wrapper
+    c.style.top = "0px";
+    c.style.left = "0px";
   });
 }
+
 window.addEventListener("resize", resizeCanvas);
 img.onload = resizeCanvas;
 resizeCanvas();
@@ -87,10 +90,13 @@ let offsetY = 0;
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-  const x = (p.clientX - rect.left)/scale;
-  const y = (p.clientY - rect.top)/scale;
-  return {x, y};
+
+  const x = (p.clientX - rect.left - offsetX) / scale;
+  const y = (p.clientY - rect.top  - offsetY) / scale;
+
+  return { x, y };
 }
+
 
 // ================= TEXTO =================
 function measureTextBox(t){
@@ -229,7 +235,7 @@ function move(e){
           imgData.data[index-3] = parseInt(colorInput.value.slice(1,3),16); // R
           imgData.data[index-2] = parseInt(colorInput.value.slice(3,5),16); // G
           imgData.data[index-1] = parseInt(colorInput.value.slice(5,7),16); // B
-          imgData.data[index] = 255; // Alpha
+          imgData.data[index] = Math.floor(255 * 0.40); // 0.15 = 15% de opacidad
         }
       }
     }
