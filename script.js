@@ -33,14 +33,14 @@ let resizeCorner = null;
 
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
-  const rect = mapWrapper.getBoundingClientRect();
-  [canvasDraw, canvasText, img].forEach(c=>{
+  const rect = img.getBoundingClientRect();
+  [canvasDraw, canvasText].forEach(c=>{
     c.width = rect.width;
     c.height = rect.height;
     c.style.width = rect.width+"px";
     c.style.height = rect.height+"px";
-    c.style.top = "0px";
-    c.style.left = "0px";
+    c.style.top = rect.top+"px";
+    c.style.left = rect.left+"px";
   });
 }
 window.addEventListener("resize", resizeCanvas);
@@ -79,23 +79,16 @@ textBtn.addEventListener("click", ()=>{
   isDrawingToolActive = false;
 });
 
-// ================= ZOOM + PAN =================
+// ================= POSICIÓN =================
 let scale = 1;
 let offsetX = 0;
 let offsetY = 0;
-let lastDist = null;
-let lastPan = null;
 
-function applyTransform(){
-  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-}
-
-// ================= POSICIÓN =================
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
 
-  // coordenadas relativas al canvas y compensando zoom/pan
+  // Coordenadas relativas al canvas compensando zoom y pan
   const x = (p.clientX - rect.left - offsetX)/scale;
   const y = (p.clientY - rect.top - offsetY)/scale;
   return {x, y};
@@ -106,6 +99,7 @@ function measureTextBox(t){
   ctxText.font = `${t.size}px Arial`;
   return { x: t.x, y: t.y, w: ctxText.measureText(t.text).width, h: t.size };
 }
+
 function getTextAt(p){
   for(let i=texts.length-1;i>=0;i--){
     const b = measureTextBox(texts[i]);
@@ -113,6 +107,7 @@ function getTextAt(p){
   }
   return null;
 }
+
 function getHandleAt(p, box){
   const s = 8;
   const corners = { tl:{x:box.x,y:box.y}, tr:{x:box.x+box.w,y:box.y}, bl:{x:box.x,y:box.y+box.h}, br:{x:box.x+box.w,y:box.y+box.h} };
@@ -287,13 +282,35 @@ function redrawTextCanvas(){
 }
 
 // ================= ZOOM + PAN =================
+let lastDist = null;
+let lastPan = null;
+
+function applyTransform(){
+  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
+
+function limitOffsets(){
+  const imgWidth = img.getBoundingClientRect().width;
+  const imgHeight = img.getBoundingClientRect().height;
+  const mapWidth = mapWrapper.getBoundingClientRect().width;
+  const mapHeight = mapWrapper.getBoundingClientRect().height;
+
+  const scaledWidth = imgWidth * scale;
+  const scaledHeight = imgHeight * scale;
+
+  const maxX = Math.max(0, (scaledWidth - mapWidth)/2);
+  const maxY = Math.max(0, (scaledHeight - mapHeight)/2);
+
+  offsetX = Math.min(maxX, Math.max(-maxX, offsetX));
+  offsetY = Math.min(maxY, Math.max(-maxY, offsetY));
+}
+
 mapWrapper.addEventListener("touchstart", e=>{
   if(e.touches.length === 2){
     lastDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
-    // Al hacer zoom → desactivar herramientas
     tool = null;
     isDrawingToolActive = false;
     [penBtn, markerBtn, eraserBtn].forEach(b=>b.classList.remove("active"));
@@ -334,11 +351,3 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
-
-function limitOffsets(){
-  const rect = mapWrapper.getBoundingClientRect();
-  const maxX = (rect.width * (scale - 1)) / 2;
-  const maxY = (rect.height * (scale - 1)) / 2;
-  offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
-  offsetY = Math.max(-maxY, Math.min(maxY, offsetY));
-}
