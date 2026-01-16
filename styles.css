@@ -1,16 +1,6 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
 
-html, body{
-  width:100%;
-  height:100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background:#f2f2f2;
-  overflow:hidden;
-}
+html,body{width:100%;height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f2f2f2;overflow:hidden;}
 
 .map-wrapper{
   position:relative;
@@ -20,6 +10,7 @@ html, body{
   justify-content:center;
   align-items:center;
   overflow:hidden;
+  touch-action:none;
 }
 
 .mapa{
@@ -28,6 +19,7 @@ html, body{
   object-fit:contain;
   user-select:none;
   -webkit-user-drag:none;
+  display:block;
 }
 
 canvas{
@@ -35,7 +27,6 @@ canvas{
   top:0;
   left:0;
   z-index:10;
-  touch-action:none;
 }
 
 .toolbox{
@@ -57,7 +48,7 @@ canvas{
   height:36px;
   border:none;
   border-radius:8px;
-  background:#ccc;
+  background:transparent;
   font-size:18px;
   cursor:pointer;
   display:flex;
@@ -67,31 +58,14 @@ canvas{
 }
 
 .toolbox button.active{
-  background:#1e88e5;
-  color:#fff;
+  background:rgba(0,0,0,.15);
 }
 
 .toolbox button:active{
   transform:scale(.95);
 }
 
-.toolbox input[type="color"]{
-  width:36px;
-  height:36px;
-  border:none;
-  padding:0;
-  background:none;
-  cursor:pointer;
-}
+.toolbox input[type="color"]{width:36px;height:36px;border:none;padding:0;background:none;cursor:pointer;}
+.toolbox input[type="range"]{width:70px;accent-color:#555;}
 
-.toolbox input[type="range"]{
-  width:70px;
-  accent-color:#555;
-}
-
-@media(max-width:600px){
-  .toolbox{
-    top:10px;
-    right:10px;
-  }
-}
+@media(max-width:600px){.toolbox{top:10px;right:10px;}}
