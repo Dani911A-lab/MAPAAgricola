@@ -350,3 +350,21 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
+
+function drawEraserPreview(p){
+  ctxText.clearRect(0,0,canvasText.width,canvasText.height);
+
+  redrawTextCanvas(); // mantiene textos visibles
+
+  const s = Number(sizeInput.value);
+
+  ctxText.save();
+  ctxText.beginPath();
+  ctxText.arc(p.x, p.y, s/2, 0, Math.PI*2);
+  ctxText.strokeStyle = "rgba(30,136,229,0.8)";
+  ctxText.lineWidth = 1;
+  ctxText.setLineDash([4,4]);
+  ctxText.stroke();
+  ctxText.restore();
+}
+
