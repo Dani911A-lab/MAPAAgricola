@@ -170,25 +170,43 @@ function redrawTextCanvas(){ ctxText.clearRect(0,0,canvasText.width,canvasText.h
 
 // ================= ZOOM + PAN =================
 mapWrapper.addEventListener("touchstart", e=>{
-  if(e.touches.length===2){ lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  if(e.touches.length===2){ 
+    lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     tool=null; isDrawingToolActive=false; [penBtn,markerBtn,eraserBtn].forEach(b=>b.classList.remove("active"));
-  } else if(e.touches.length===1 && scale>1 && !isDrawingToolActive){ lastPan={x:e.touches[0].clientX, y:e.touches[0].clientY}; }
+  } else if(e.touches.length===1 && scale>1 && !isDrawingToolActive){ lastPan={x:e.touches[0].clientX,y:e.touches[0].clientY}; }
 }, {passive:false});
 
 mapWrapper.addEventListener("touchmove", e=>{
-  if(e.touches.length===2){ e.preventDefault(); const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    if(lastDist){ let factor=dist/lastDist; scale*=factor; scale=Math.min(Math.max(scale,1),4); applyTransform(); } lastDist=dist;
-  } else if(e.touches.length===1 && scale>1 && lastPan && !isDrawingToolActive){ e.preventDefault();
+  if(e.touches.length===2){ 
+    e.preventDefault();
+    const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(lastDist){ 
+      let factor=dist/lastDist; 
+      scale*=factor; 
+      scale=Math.min(Math.max(scale,1),4);
+      // Ajustar offset para que el mapa nunca salga del contenedor
+      const rect = mapWrapper.getBoundingClientRect();
+      const maxOffsetX = Math.max(0, (scale-1)*rect.width/2);
+      const maxOffsetY = Math.max(0, (scale-1)*rect.height/2);
+      offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
+      offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
+      applyTransform();
+    } 
+    lastDist=dist;
+  } else if(e.touches.length===1 && scale>1 && lastPan && !isDrawingToolActive){ 
+    e.preventDefault();
     const dx=e.touches[0].clientX-lastPan.x; const dy=e.touches[0].clientY-lastPan.y;
     offsetX+=dx; offsetY+=dy;
     const rect=mapWrapper.getBoundingClientRect();
-    const maxX=(rect.width*(scale-1))/2; const maxY=(rect.height*(scale-1))/2;
-    offsetX=Math.max(-maxX,Math.min(maxX,offsetX)); offsetY=Math.max(-maxY,Math.min(maxY,offsetY));
-    applyTransform(); lastPan.x=e.touches[0].clientX; lastPan.y=e.touches[0].clientY;
+    const maxOffsetX = Math.max(0, (scale-1)*rect.width/2);
+    const maxOffsetY = Math.max(0, (scale-1)*rect.height/2);
+    offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
+    offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
+    applyTransform();
+    lastPan.x=e.touches[0].clientX; lastPan.y=e.touches[0].clientY;
   }
 }, {passive:false});
 
 mapWrapper.addEventListener("touchend", e=>{ if(e.touches.length<2) lastDist=null; if(e.touches.length===0) lastPan=null; });
 
 function applyTransform(){ mapWrapper.style.transform=`translate(${offsetX}px, ${offsetY}px) scale(${scale})`; }
-s
