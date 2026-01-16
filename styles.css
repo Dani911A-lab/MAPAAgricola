@@ -9,7 +9,7 @@ html, body{
   height:100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   background:#f2f2f2;
-  overflow:hidden; /* Se mantiene para el canvas completo */
+  overflow:hidden;
 }
 
 .map-wrapper{
@@ -20,7 +20,6 @@ html, body{
   justify-content:center;
   align-items:center;
   overflow:hidden;
-  touch-action:none; /* manejaremos zoom y pan con JS */
 }
 
 .mapa{
@@ -36,10 +35,7 @@ canvas{
   top:0;
   left:0;
   z-index:10;
-}
-
-#textCanvas{
-  z-index:20;
+  touch-action:none;
 }
 
 .toolbox{
@@ -61,19 +57,18 @@ canvas{
   height:36px;
   border:none;
   border-radius:8px;
-  background:rgba(255,255,255,0.6); /* por defecto desactivado */
+  background:#ccc;
   font-size:18px;
   cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+  transition: background .15s ease, transform .15s ease;
 }
 
 .toolbox button.active{
-  background: #1e88e5;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background:#1e88e5;
+  color:#fff;
 }
 
 .toolbox button:active{
