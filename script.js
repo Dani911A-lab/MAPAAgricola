@@ -39,8 +39,8 @@ function resizeCanvas(){
     c.height = rect.height;
     c.style.width = rect.width+"px";
     c.style.height = rect.height+"px";
-    c.style.top = rect.top+"px";
-    c.style.left = rect.left+"px";
+    c.style.top = "0px";
+    c.style.left = "0px";
   });
 }
 window.addEventListener("resize", resizeCanvas);
@@ -80,17 +80,19 @@ textBtn.addEventListener("click", ()=>{
 });
 
 // ================= POSICIÓN =================
-let scale = 1;
-let offsetX = 0;
-let offsetY = 0;
+let offsetX = 0, offsetY = 0, scale = 1;
 
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
 
-  // Coordenadas relativas al canvas compensando zoom y pan
-  const x = (p.clientX - rect.left - offsetX)/scale;
-  const y = (p.clientY - rect.top - offsetY)/scale;
+  let x = p.clientX - rect.left;
+  let y = p.clientY - rect.top;
+
+  // Ajuste por zoom y pan
+  x = (x - offsetX) / scale;
+  y = (y - offsetY) / scale;
+
   return {x, y};
 }
 
@@ -285,32 +287,13 @@ function redrawTextCanvas(){
 let lastDist = null;
 let lastPan = null;
 
-function applyTransform(){
-  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-}
-
-function limitOffsets(){
-  const imgWidth = img.getBoundingClientRect().width;
-  const imgHeight = img.getBoundingClientRect().height;
-  const mapWidth = mapWrapper.getBoundingClientRect().width;
-  const mapHeight = mapWrapper.getBoundingClientRect().height;
-
-  const scaledWidth = imgWidth * scale;
-  const scaledHeight = imgHeight * scale;
-
-  const maxX = Math.max(0, (scaledWidth - mapWidth)/2);
-  const maxY = Math.max(0, (scaledHeight - mapHeight)/2);
-
-  offsetX = Math.min(maxX, Math.max(-maxX, offsetX));
-  offsetY = Math.min(maxY, Math.max(-maxY, offsetY));
-}
-
 mapWrapper.addEventListener("touchstart", e=>{
   if(e.touches.length === 2){
     lastDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
+    // desactivar herramientas
     tool = null;
     isDrawingToolActive = false;
     [penBtn, markerBtn, eraserBtn].forEach(b=>b.classList.remove("active"));
@@ -330,7 +313,16 @@ mapWrapper.addEventListener("touchmove", e=>{
       let factor = dist / lastDist;
       scale *= factor;
       scale = Math.min(Math.max(scale, 1), 4);
-      limitOffsets();
+
+      // recalcular offsets para mantener contenido dentro del contenedor
+      const rect = mapWrapper.parentElement.getBoundingClientRect();
+      const mapW = img.width * scale;
+      const mapH = img.height * scale;
+      const maxOffsetX = Math.max(0, (mapW - rect.width)/2);
+      const maxOffsetY = Math.max(0, (mapH - rect.height)/2);
+      offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
+      offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
+
       applyTransform();
     }
     lastDist = dist;
@@ -340,7 +332,15 @@ mapWrapper.addEventListener("touchmove", e=>{
     const dy = e.touches[0].clientY - lastPan.y;
     offsetX += dx;
     offsetY += dy;
-    limitOffsets();
+
+    const rect = mapWrapper.parentElement.getBoundingClientRect();
+    const mapW = img.width * scale;
+    const mapH = img.height * scale;
+    const maxOffsetX = Math.max(0, (mapW - rect.width)/2);
+    const maxOffsetY = Math.max(0, (mapH - rect.height)/2);
+    offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
+    offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
+
     applyTransform();
     lastPan.x = e.touches[0].clientX;
     lastPan.y = e.touches[0].clientY;
@@ -351,3 +351,7 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
+
+function applyTransform(){
+  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale}) translate(-50%, -50%)`;
+}
