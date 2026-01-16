@@ -7,6 +7,7 @@ const ctxText = canvasText.getContext("2d");
 
 const img = document.getElementById("mapa");
 const mapWrapper = document.getElementById("mapWrapper");
+const mapContainer = document.getElementById("mapContainer");
 
 // ================= HERRAMIENTAS =================
 const textBtn   = document.getElementById("textTool");
@@ -30,6 +31,13 @@ let dragOffset = {x:0, y:0};
 let resizing = false;
 let draggingText = false;
 let resizeCorner = null;
+
+// ================= ZOOM/PAN =================
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+let lastDist = null;
+let lastPan = null;
 
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
@@ -65,12 +73,10 @@ function toggleTool(selectedTool, btn){
   addingText = false;
 }
 
-// Botones toggle
 penBtn.addEventListener("click", ()=> toggleTool("pen", penBtn));
 markerBtn.addEventListener("click", ()=> toggleTool("marker", markerBtn));
 eraserBtn.addEventListener("click", ()=> toggleTool("eraser", eraserBtn));
 
-// Texto independiente
 textBtn.addEventListener("click", ()=>{
   tool = "text";
   addingText = true;
@@ -80,8 +86,6 @@ textBtn.addEventListener("click", ()=>{
 });
 
 // ================= POSICIÓN =================
-let offsetX = 0, offsetY = 0, scale = 1;
-
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
@@ -89,7 +93,7 @@ function getPos(e){
   let x = p.clientX - rect.left;
   let y = p.clientY - rect.top;
 
-  // Ajuste por zoom y pan
+  // Ajuste por zoom/pan
   x = (x - offsetX) / scale;
   y = (y - offsetY) / scale;
 
@@ -284,8 +288,7 @@ function redrawTextCanvas(){
 }
 
 // ================= ZOOM + PAN =================
-let lastDist = null;
-let lastPan = null;
+mapWrapper.style.transformOrigin = "top left";
 
 mapWrapper.addEventListener("touchstart", e=>{
   if(e.touches.length === 2){
@@ -293,7 +296,6 @@ mapWrapper.addEventListener("touchstart", e=>{
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
-    // desactivar herramientas
     tool = null;
     isDrawingToolActive = false;
     [penBtn, markerBtn, eraserBtn].forEach(b=>b.classList.remove("active"));
@@ -314,12 +316,14 @@ mapWrapper.addEventListener("touchmove", e=>{
       scale *= factor;
       scale = Math.min(Math.max(scale, 1), 4);
 
-      // recalcular offsets para mantener contenido dentro del contenedor
-      const rect = mapWrapper.parentElement.getBoundingClientRect();
-      const mapW = img.width * scale;
-      const mapH = img.height * scale;
-      const maxOffsetX = Math.max(0, (mapW - rect.width)/2);
-      const maxOffsetY = Math.max(0, (mapH - rect.height)/2);
+      // Ajustar límites para que no se generen espacios vacíos
+      const rect = mapContainer.getBoundingClientRect();
+      const mapWidth = img.width * scale;
+      const mapHeight = img.height * scale;
+
+      const maxOffsetX = Math.max(0, (mapWidth - rect.width)/2);
+      const maxOffsetY = Math.max(0, (mapHeight - rect.height)/2);
+
       offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
       offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
 
@@ -333,11 +337,13 @@ mapWrapper.addEventListener("touchmove", e=>{
     offsetX += dx;
     offsetY += dy;
 
-    const rect = mapWrapper.parentElement.getBoundingClientRect();
-    const mapW = img.width * scale;
-    const mapH = img.height * scale;
-    const maxOffsetX = Math.max(0, (mapW - rect.width)/2);
-    const maxOffsetY = Math.max(0, (mapH - rect.height)/2);
+    const rect = mapContainer.getBoundingClientRect();
+    const mapWidth = img.width * scale;
+    const mapHeight = img.height * scale;
+
+    const maxOffsetX = Math.max(0, (mapWidth - rect.width)/2);
+    const maxOffsetY = Math.max(0, (mapHeight - rect.height)/2);
+
     offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
     offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
 
@@ -353,5 +359,5 @@ mapWrapper.addEventListener("touchend", e=>{
 });
 
 function applyTransform(){
-  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale}) translate(-50%, -50%)`;
+  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
 }
