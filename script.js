@@ -134,6 +134,12 @@ function getHandleAt(p, box){
 function start(e){
   const p = getPos(e);
 
+  // Vista previa del borrador
+if(tool === "eraser" && !drawing){
+  drawEraserPreview(p);
+}
+
+
   if(tool === "text"){
     const hit = getTextAt(p);
     if(hit){
@@ -256,12 +262,18 @@ function end(){
 }
 
 // ================= DIBUJAR TEXTO =================
-function drawText(t){
-  ctxText.fillStyle = t.color;
-  ctxText.font = `${t.size}px Arial`;
-  ctxText.textBaseline = "top";
-  ctxText.fillText(t.text, t.x, t.y);
+function end(){
+  drawing = false;
+  resizing = false;
+  draggingText = false;
+  resizeCorner = null;
+
+  ctxDraw.globalCompositeOperation="source-over";
+
+  // Limpiar preview del borrador
+  redrawTextCanvas();
 }
+
 
 // ================= REDRAW =================
 function redrawTextCanvas(){
