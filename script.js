@@ -81,10 +81,20 @@ textBtn.addEventListener("click", ()=>{
 
 // ================= POSICIÓN =================
 function getPos(e){
-  const r = canvasDraw.getBoundingClientRect();
+  const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-  return { x: p.clientX - r.left, y: p.clientY - r.top };
+
+  // Coordenadas relativas al canvas
+  let x = p.clientX - rect.left;
+  let y = p.clientY - rect.top;
+
+  // Ajuste por zoom y pan
+  x = (x - offsetX) / scale;
+  y = (y - offsetY) / scale;
+
+  return {x, y};
 }
+
 
 // ================= TEXTO =================
 function measureTextBox(t){
