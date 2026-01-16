@@ -380,51 +380,67 @@ function drawEraserPreview(p){
   ctxText.restore();
 }
 
-
 // ================= DESCARGAR PDF =================
-const downloadBtn = document.getElementById("downloadPDF");
+const downloadBtn = document.getElementById("downloadBtn");
 
-downloadBtn.addEventListener("click", descargarPDF);
+downloadBtn.addEventListener("click", exportPDF);
 
-function descargarPDF(){
+function exportPDF(){
 
-  // Crear canvas final
+  // Canvas final REAL (sin zoom ni pan)
   const exportCanvas = document.createElement("canvas");
   const ctx = exportCanvas.getContext("2d");
 
-  const w = canvasDraw.width;
-  const h = canvasDraw.height;
+  // Tamaño real del mapa
+  exportCanvas.width = img.naturalWidth;
+  exportCanvas.height = img.naturalHeight;
 
-  exportCanvas.width = w;
-  exportCanvas.height = h;
+  // Dibujar mapa base
+  ctx.drawImage(
+    img,
+    0, 0,
+    exportCanvas.width,
+    exportCanvas.height
+  );
 
-  // Fondo blanco
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, w, h);
+  // Dibujar lo pintado (alineado)
+  ctx.drawImage(
+    canvasDraw,
+    0, 0,
+    canvasDraw.width, canvasDraw.height,
+    0, 0,
+    exportCanvas.width, exportCanvas.height
+  );
 
-  // 1️⃣ Mapa base
-  ctx.drawImage(img, 0, 0, w, h);
-
-  // 2️⃣ Dibujo (marker, lápiz, borrador)
-  ctx.drawImage(canvasDraw, 0, 0);
-
-  // 3️⃣ Textos
-  ctx.drawImage(canvasText, 0, 0);
+  // Dibujar textos
+  ctx.drawImage(
+    canvasText,
+    0, 0,
+    canvasText.width, canvasText.height,
+    0, 0,
+    exportCanvas.width, exportCanvas.height
+  );
 
   // Convertir a imagen
-  const imgData = exportCanvas.toDataURL("image/jpeg", 1.0);
+  const imgData = exportCanvas.toDataURL("image/png");
 
-  // Crear PDF
-  const { jsPDF } = window.jspdf;
-
-  const pdf = new jsPDF({
-    orientation: w > h ? "landscape" : "portrait",
+  // PDF tamaño exacto de la imagen
+  const pdf = new jspdf.jsPDF({
+    orientation: exportCanvas.width > exportCanvas.height ? "landscape" : "portrait",
     unit: "px",
-    format: [w, h]
+    format: [exportCanvas.width, exportCanvas.height]
   });
 
-  pdf.addImage(imgData, "JPEG", 0, 0, w, h);
+  pdf.addImage(
+    imgData,
+    "PNG",
+    0,
+    0,
+    exportCanvas.width,
+    exportCanvas.height
+  );
 
-  pdf.save("mapa_anotado.pdf");
+  // Descarga directa (móvil y desktop)
+  pdf.save("mapa_hacienda.pdf");
 }
 
