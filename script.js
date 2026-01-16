@@ -31,6 +31,13 @@ let resizing = false;
 let draggingText = false;
 let resizeCorner = null;
 
+// ================= ZOOM + PAN =================
+let lastDist = null;
+let lastPan = null;
+let offsetX = 0;
+let offsetY = 0;
+let scale = 1;
+
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
   const rect = img.getBoundingClientRect();
@@ -88,15 +95,14 @@ function getPos(e){
   let x = p.clientX - rect.left;
   let y = p.clientY - rect.top;
 
-  // Ajuste por zoom y pan
+  // Ajuste por zoom y pan (contexto interno)
   x = (x - offsetX) / scale;
   y = (y - offsetY) / scale;
 
   return {x, y};
 }
 
-
-// ================= TEXTO =================
+// ================= TEXTOS =================
 function measureTextBox(t){
   ctxText.font = `${t.size}px Arial`;
   return { x: t.x, y: t.y, w: ctxText.measureText(t.text).width, h: t.size };
@@ -123,9 +129,9 @@ function getHandleAt(p, box){
 // ================= EVENTS =================
 [canvasDraw, canvasText].forEach(c=>{
   c.addEventListener("mousedown", start);
-  c.addEventListener("touchstart", start);
+  c.addEventListener("touchstart", start, {passive:false});
   c.addEventListener("mousemove", move);
-  c.addEventListener("touchmove", move);
+  c.addEventListener("touchmove", move, {passive:false});
   c.addEventListener("mouseup", end);
   c.addEventListener("mouseleave", end);
   c.addEventListener("touchend", end);
@@ -284,19 +290,13 @@ function redrawTextCanvas(){
 }
 
 // ================= ZOOM + PAN =================
-let lastDist = null;
-let lastPan = null;
-let offsetX = 0;
-let offsetY = 0;
-let scale = 1;
-
 mapWrapper.addEventListener("touchstart", e=>{
   if(e.touches.length === 2){
     lastDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
-    // Al hacer zoom → desactivar herramientas
+    // Desactivar herramientas al hacer zoom
     tool = null;
     isDrawingToolActive = false;
     [penBtn, markerBtn, eraserBtn].forEach(b=>b.classList.remove("active"));
@@ -316,7 +316,6 @@ mapWrapper.addEventListener("touchmove", e=>{
       let factor = dist / lastDist;
       scale *= factor;
       scale = Math.min(Math.max(scale, 1), 4);
-      applyTransform();
     }
     lastDist = dist;
   } else if(e.touches.length === 1 && scale > 1 && lastPan && !isDrawingToolActive){
@@ -325,14 +324,6 @@ mapWrapper.addEventListener("touchmove", e=>{
     const dy = e.touches[0].clientY - lastPan.y;
     offsetX += dx;
     offsetY += dy;
-
-    const rect = mapWrapper.getBoundingClientRect();
-    const maxX = (rect.width * (scale - 1)) / 2;
-    const maxY = (rect.height * (scale - 1)) / 2;
-    offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
-    offsetY = Math.max(-maxY, Math.min(maxY, offsetY));
-
-    applyTransform();
     lastPan.x = e.touches[0].clientX;
     lastPan.y = e.touches[0].clientY;
   }
@@ -342,7 +333,3 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
-
-function applyTransform(){
-  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-}
