@@ -380,3 +380,51 @@ function drawEraserPreview(p){
   ctxText.restore();
 }
 
+
+// ================= DESCARGAR PDF =================
+const downloadBtn = document.getElementById("downloadPDF");
+
+downloadBtn.addEventListener("click", descargarPDF);
+
+function descargarPDF(){
+
+  // Crear canvas final
+  const exportCanvas = document.createElement("canvas");
+  const ctx = exportCanvas.getContext("2d");
+
+  const w = canvasDraw.width;
+  const h = canvasDraw.height;
+
+  exportCanvas.width = w;
+  exportCanvas.height = h;
+
+  // Fondo blanco
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+
+  // 1️⃣ Mapa base
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // 2️⃣ Dibujo (marker, lápiz, borrador)
+  ctx.drawImage(canvasDraw, 0, 0);
+
+  // 3️⃣ Textos
+  ctx.drawImage(canvasText, 0, 0);
+
+  // Convertir a imagen
+  const imgData = exportCanvas.toDataURL("image/jpeg", 1.0);
+
+  // Crear PDF
+  const { jsPDF } = window.jspdf;
+
+  const pdf = new jsPDF({
+    orientation: w > h ? "landscape" : "portrait",
+    unit: "px",
+    format: [w, h]
+  });
+
+  pdf.addImage(imgData, "JPEG", 0, 0, w, h);
+
+  pdf.save("mapa_anotado.pdf");
+}
+
