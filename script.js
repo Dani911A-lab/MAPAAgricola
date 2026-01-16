@@ -7,7 +7,6 @@ const ctxText = canvasText.getContext("2d");
 
 const img = document.getElementById("mapa");
 const mapWrapper = document.getElementById("mapWrapper");
-const mapContainer = document.getElementById("mapContainer");
 
 // ================= HERRAMIENTAS =================
 const textBtn   = document.getElementById("textTool");
@@ -32,13 +31,6 @@ let resizing = false;
 let draggingText = false;
 let resizeCorner = null;
 
-// ================= ZOOM/PAN =================
-let scale = 1;
-let offsetX = 0;
-let offsetY = 0;
-let lastDist = null;
-let lastPan = null;
-
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
   const rect = img.getBoundingClientRect();
@@ -47,8 +39,8 @@ function resizeCanvas(){
     c.height = rect.height;
     c.style.width = rect.width+"px";
     c.style.height = rect.height+"px";
-    c.style.top = "0px";
-    c.style.left = "0px";
+    c.style.top = rect.top+"px";
+    c.style.left = rect.left+"px";
   });
 }
 window.addEventListener("resize", resizeCanvas);
@@ -73,10 +65,12 @@ function toggleTool(selectedTool, btn){
   addingText = false;
 }
 
+// Botones toggle
 penBtn.addEventListener("click", ()=> toggleTool("pen", penBtn));
 markerBtn.addEventListener("click", ()=> toggleTool("marker", markerBtn));
 eraserBtn.addEventListener("click", ()=> toggleTool("eraser", eraserBtn));
 
+// Texto independiente
 textBtn.addEventListener("click", ()=>{
   tool = "text";
   addingText = true;
@@ -86,17 +80,15 @@ textBtn.addEventListener("click", ()=>{
 });
 
 // ================= POSICIÓN =================
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-
-  let x = p.clientX - rect.left;
-  let y = p.clientY - rect.top;
-
-  // Ajuste por zoom/pan
-  x = (x - offsetX) / scale;
-  y = (y - offsetY) / scale;
-
+  const x = (p.clientX - rect.left)/scale;
+  const y = (p.clientY - rect.top)/scale;
   return {x, y};
 }
 
@@ -288,7 +280,26 @@ function redrawTextCanvas(){
 }
 
 // ================= ZOOM + PAN =================
-mapWrapper.style.transformOrigin = "top left";
+let lastDist = null;
+let lastPan = null;
+
+function applyTransform(){
+  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
+
+function limitOffsets(){
+  const rect = img.getBoundingClientRect();
+  const w = rect.width * scale;
+  const h = rect.height * scale;
+  const cw = mapWrapper.getBoundingClientRect().width;
+  const ch = mapWrapper.getBoundingClientRect().height;
+
+  const maxX = Math.max(0, (w - cw)/2);
+  const maxY = Math.max(0, (h - ch)/2);
+
+  offsetX = Math.min(maxX, Math.max(-maxX, offsetX));
+  offsetY = Math.min(maxY, Math.max(-maxY, offsetY));
+}
 
 mapWrapper.addEventListener("touchstart", e=>{
   if(e.touches.length === 2){
@@ -315,18 +326,7 @@ mapWrapper.addEventListener("touchmove", e=>{
       let factor = dist / lastDist;
       scale *= factor;
       scale = Math.min(Math.max(scale, 1), 4);
-
-      // Ajustar límites para que no se generen espacios vacíos
-      const rect = mapContainer.getBoundingClientRect();
-      const mapWidth = img.width * scale;
-      const mapHeight = img.height * scale;
-
-      const maxOffsetX = Math.max(0, (mapWidth - rect.width)/2);
-      const maxOffsetY = Math.max(0, (mapHeight - rect.height)/2);
-
-      offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
-      offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
-
+      limitOffsets();
       applyTransform();
     }
     lastDist = dist;
@@ -336,17 +336,7 @@ mapWrapper.addEventListener("touchmove", e=>{
     const dy = e.touches[0].clientY - lastPan.y;
     offsetX += dx;
     offsetY += dy;
-
-    const rect = mapContainer.getBoundingClientRect();
-    const mapWidth = img.width * scale;
-    const mapHeight = img.height * scale;
-
-    const maxOffsetX = Math.max(0, (mapWidth - rect.width)/2);
-    const maxOffsetY = Math.max(0, (mapHeight - rect.height)/2);
-
-    offsetX = Math.min(maxOffsetX, Math.max(-maxOffsetX, offsetX));
-    offsetY = Math.min(maxOffsetY, Math.max(-maxOffsetY, offsetY));
-
+    limitOffsets();
     applyTransform();
     lastPan.x = e.touches[0].clientX;
     lastPan.y = e.touches[0].clientY;
@@ -357,7 +347,3 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
-
-function applyTransform(){
-  mapWrapper.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-}
