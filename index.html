@@ -4,25 +4,21 @@
   <meta charset="UTF-8">
   <title>Mapa Hacienda</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-
 <div id="mapWrapper" class="map-wrapper">
-  <img src="img/mapa.png" class="mapa" id="mapa">
+  <img src="img/mapa.png" id="mapa" class="mapa">
   <canvas id="drawCanvas"></canvas>
   <canvas id="textCanvas"></canvas>
 </div>
 
-<!-- MENU FLOTANTE -->
 <div class="toolbox">
   <button id="textTool" title="Texto">🅰️</button>
   <button id="penTool" title="Lápiz">✏️</button>
   <button id="markerTool" title="Resaltador">🖍️</button>
   <button id="eraserTool" title="Borrador">🧽</button>
-
   <input type="color" id="markerColor" value="#ffeb3b" title="Color">
   <input type="range" id="markerSize" min="8" max="40" value="18" title="Grosor">
 </div>
