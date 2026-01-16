@@ -217,7 +217,7 @@ function move(e){
 
     ctxDraw.save();
     ctxDraw.globalCompositeOperation="source-over";
-    ctxDraw.globalAlpha=0.06;
+    ctxDraw.globalAlpha=0.40;
     ctxDraw.strokeStyle=colorInput.value;
     ctxDraw.lineWidth=s;
     ctxDraw.lineTo(p.x,p.y);
@@ -347,3 +347,4 @@ mapWrapper.addEventListener("touchend", e=>{
   if(e.touches.length < 2) lastDist = null;
   if(e.touches.length === 0) lastPan = null;
 });
+
