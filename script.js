@@ -90,13 +90,10 @@ let offsetY = 0;
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-
-  const x = (p.clientX - rect.left - offsetX) / scale;
-  const y = (p.clientY - rect.top  - offsetY) / scale;
-
-  return { x, y };
+  const x = (p.clientX - rect.left)/scale;
+  const y = (p.clientY - rect.top)/scale;
+  return {x, y};
 }
-
 
 // ================= TEXTO =================
 function measureTextBox(t){
@@ -214,33 +211,21 @@ function move(e){
 
   if(tool === "marker"){
     const s = Number(sizeInput.value);
-    const radius = s / 2;
+    ctxDraw.save();
+    ctxDraw.globalCompositeOperation="destination-out";
+    ctxDraw.lineWidth=s;
+    ctxDraw.lineTo(p.x,p.y);
+    ctxDraw.stroke();
+    ctxDraw.restore();
 
-    // Obtenemos la imagen actual del canvas
-    const imgData = ctxDraw.getImageData(0,0,canvasDraw.width,canvasDraw.height);
-    const x = Math.floor(p.x);
-    const y = Math.floor(p.y);
-
-    for(let i=-radius; i<=radius; i++){
-      for(let j=-radius; j<=radius; j++){
-        const dx = x + i;
-        const dy = y + j;
-        if(dx < 0 || dx >= canvasDraw.width || dy < 0 || dy >= canvasDraw.height) continue;
-        const dist = Math.sqrt(i*i + j*j);
-        if(dist > radius) continue;
-
-        const index = (dy * canvasDraw.width + dx) * 4 + 3; // canal alpha
-        if(imgData.data[index] === 0){
-          // Convertir color hex a RGB
-          imgData.data[index-3] = parseInt(colorInput.value.slice(1,3),16); // R
-          imgData.data[index-2] = parseInt(colorInput.value.slice(3,5),16); // G
-          imgData.data[index-1] = parseInt(colorInput.value.slice(5,7),16); // B
-          imgData.data[index] = Math.floor(255 * 0.40); // 0.15 = 15% de opacidad
-        }
-      }
-    }
-
-    ctxDraw.putImageData(imgData,0,0);
+    ctxDraw.save();
+    ctxDraw.globalCompositeOperation="source-over";
+    ctxDraw.globalAlpha=0.40;
+    ctxDraw.strokeStyle=colorInput.value;
+    ctxDraw.lineWidth=s;
+    ctxDraw.lineTo(p.x,p.y);
+    ctxDraw.stroke();
+    ctxDraw.restore();
   }
 
   if(tool === "eraser"){
@@ -260,7 +245,6 @@ function move(e){
     ctxDraw.restore();
   }
 }
-
 
 // ================= END =================
 function end(){
