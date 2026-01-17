@@ -124,3 +124,18 @@ canvas{
 #downloadBtn:active{
   transform:scale(0.95);
 }
+
+.tool-icon{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Mantiene el mismo look del botón */
+.toolbox button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
