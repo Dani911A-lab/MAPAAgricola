@@ -18,17 +18,27 @@
 
 <div class="toolbox">
   <button id="textTool" title="Texto">🅰️</button>
-  <button id="penTool" title="Lápiz">✏️</button>
-  <button id="markerTool" title="Resaltador">🖍️</button>
-  <button id="eraserTool" title="Borrador">🧽</button>
+
+  <button id="penTool" title="Lápiz">
+    <img src="img/lapiz.png" class="tool-icon">
+  </button>
+
+  <button id="markerTool" title="Resaltador">
+    <img src="img/resaltador.png" class="tool-icon">
+  </button>
+
+  <button id="eraserTool" title="Borrador">
+    <img src="img/borrador.png" class="tool-icon">
+  </button>
+
+  <button id="downloadBtn" title="Descargar PDF">
+    <img src="img/descarga.png" class="tool-icon">
+  </button>
 
   <input type="color" id="markerColor" value="#ffeb3b" title="Color">
   <input type="range" id="markerSize" min="8" max="40" value="18" title="Grosor">
-
-  <!-- BOTÓN DESCARGAR PDF -->
-  <button id="downloadBtn" title="Descargar PDF">⬇️</button>
-
 </div>
+
 
 
 <!-- jsPDF (solo agregado, no interfiere con nada) -->
