@@ -200,15 +200,25 @@ function getTextAt(p){
   return null;
 }
 
+const HANDLE_SIZE = 18;       // tamaño de la esquina (cambia aquí para mayor o menor)
+const HANDLE_OFFSET = HANDLE_SIZE / 2;
+
 function getHandleAt(p, box){
-  const s = 8;
-  const corners = { tl:{x:box.x,y:box.y}, tr:{x:box.x+box.w,y:box.y}, bl:{x:box.x,y:box.y+box.h}, br:{x:box.x+box.w,y:box.y+box.h} };
+  const corners = {
+    tl:{x:box.x, y:box.y},
+    tr:{x:box.x+box.w, y:box.y},
+    bl:{x:box.x, y:box.y+box.h},
+    br:{x:box.x+box.w, y:box.y+box.h}
+  };
   for(const k in corners){
     const c = corners[k];
-    if(Math.abs(p.x-c.x)<s && Math.abs(p.y-c.y)<s) return k;
+    if(Math.abs(p.x-c.x) <= HANDLE_SIZE && Math.abs(p.y-c.y) <= HANDLE_SIZE){
+      return k;
+    }
   }
   return null;
 }
+
 
 // ================= EVENTS =================
 [canvasDraw, canvasText].forEach(c=>{
@@ -365,20 +375,33 @@ function drawText(t){
 function redrawTextCanvas(){
   ctxText.clearRect(0,0,canvasText.width,canvasText.height);
   texts.forEach(t => drawText(t));
+
   if(activeText){
     const b = measureTextBox(activeText);
+
+    // marco de selección
     ctxText.save();
     ctxText.setLineDash([4,4]);
-    ctxText.strokeStyle="#1e88e5";
-    ctxText.strokeRect(b.x-2,b.y-2,b.w+4,b.h+4);
+    ctxText.strokeStyle = "#1e88e5";
+    ctxText.lineWidth = 1;
+    ctxText.strokeRect(b.x-2, b.y-2, b.w+4, b.h+4);
     ctxText.restore();
-    const pts = [[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]];
+
+    // handles grandes
+    const pts = [
+      [b.x, b.y],
+      [b.x+b.w, b.y],
+      [b.x, b.y+b.h],
+      [b.x+b.w, b.y+b.h]
+    ];
+
+    ctxText.fillStyle = "#1e88e5";
     pts.forEach(p=>{
-      ctxText.fillStyle="#1e88e5";
-      ctxText.fillRect(p[0]-4,p[1]-4,8,8);
+      ctxText.fillRect(p[0]-HANDLE_OFFSET, p[1]-HANDLE_OFFSET, HANDLE_SIZE, HANDLE_SIZE);
     });
   }
 }
+
 
 // ================= ZOOM + PAN =================
 let lastDist = null;
