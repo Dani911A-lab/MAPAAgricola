@@ -11,6 +11,17 @@ const mapWrapper = document.getElementById("mapWrapper");
 // ================= MAP SELECTOR =================
 const mapSelect = document.getElementById("mapSelect");
 
+// cambio manual desde el selector
+mapSelect.addEventListener("change", e => {
+  changeMap(e.target.value);
+});
+
+// mapa inicial (MARIA)
+window.addEventListener("load", () => {
+  changeMap(mapSelect.value);
+});
+
+
 // ================= HERRAMIENTAS =================
 const textBtn   = document.getElementById("textTool");
 const penBtn    = document.getElementById("penTool");
@@ -55,8 +66,12 @@ resizeCanvas();
 
 // ================= CAMBIO DE MAPA =================
 function changeMap(mapName){
-  img.src = `img/${mapName}.png`;
 
+  // 🔒 Bloquear interacción mientras carga
+  tool = null;
+  isDrawingToolActive = false;
+
+  // Limpiar canvas y estado
   ctxDraw.clearRect(0,0,canvasDraw.width,canvasDraw.height);
   ctxText.clearRect(0,0,canvasText.width,canvasText.height);
 
@@ -68,15 +83,17 @@ function changeMap(mapName){
   offsetX = 0;
   offsetY = 0;
   applyTransform();
+
+  // ⚠️ CLAVE: esperar a que la imagen NUEVA cargue
+  img.onload = () => {
+    resizeCanvas();      // recalcula tamaño y posición
+    redrawTextCanvas();  // asegura canvas limpio
+  };
+
+  // Cambiar imagen
+  img.src = `img/${mapName}.png`;
 }
 
-mapSelect.addEventListener("change", e=>{
-  changeMap(e.target.value);
-});
-
-window.addEventListener("load", ()=>{
-  changeMap("maria");
-});
 
 // ================= TOGGLE HERRAMIENTAS =================
 function toggleTool(selectedTool, btn){
