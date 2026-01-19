@@ -22,6 +22,48 @@ window.addEventListener("load", () => {
 });
 
 
+// ================= LOCAL STORAGE POR MAPA =================
+
+function getMapKey(mapName){
+  return `mapData_${mapName}`;
+}
+
+function saveCurrentMap(){
+  if(!img.src) return;
+
+  const mapName = img.src.split("/").pop().replace(".png","");
+
+  const data = {
+    draw: canvasDraw.toDataURL(),
+    texts: texts
+  };
+
+  localStorage.setItem(getMapKey(mapName), JSON.stringify(data));
+}
+
+function loadMapData(mapName){
+  const raw = localStorage.getItem(getMapKey(mapName));
+  if(!raw) return;
+
+  const data = JSON.parse(raw);
+
+  // Restaurar dibujos
+  if(data.draw){
+    const imgDraw = new Image();
+    imgDraw.onload = ()=>{
+      ctxDraw.clearRect(0,0,canvasDraw.width,canvasDraw.height);
+      ctxDraw.drawImage(imgDraw,0,0,canvasDraw.width,canvasDraw.height);
+    };
+    imgDraw.src = data.draw;
+  }
+
+  // Restaurar textos
+  texts = Array.isArray(data.texts) ? data.texts : [];
+  redrawTextCanvas();
+}
+
+
+
 // ================= HERRAMIENTAS =================
 const textBtn   = document.getElementById("textTool");
 const penBtn    = document.getElementById("penTool");
@@ -67,6 +109,9 @@ resizeCanvas();
 // ================= CAMBIO DE MAPA =================
 function changeMap(mapName){
 
+  // 💾 GUARDAR MAPA ACTUAL
+  saveCurrentMap();
+
   // 🔒 Bloquear interacción mientras carga
   tool = null;
   isDrawingToolActive = false;
@@ -79,6 +124,7 @@ function changeMap(mapName){
   activeText = null;
   drawing = false;
 
+  // Reset zoom y pan
   scale = 1;
   offsetX = 0;
   offsetY = 0;
@@ -86,13 +132,15 @@ function changeMap(mapName){
 
   // ⚠️ CLAVE: esperar a que la imagen NUEVA cargue
   img.onload = () => {
-    resizeCanvas();      // recalcula tamaño y posición
-    redrawTextCanvas();  // asegura canvas limpio
+    resizeCanvas();        // recalcula tamaño y posición
+    redrawTextCanvas();    // limpia canvas texto
+    loadMapData(mapName);  // ♻️ RESTAURA DATOS DEL MAPA
   };
 
   // Cambiar imagen
   img.src = `img/${mapName}.png`;
 }
+
 
 
 // ================= TOGGLE HERRAMIENTAS =================
@@ -251,7 +299,7 @@ function move(e){
   if(tool === "pen"){
     ctxDraw.globalCompositeOperation = "source-over";
     ctxDraw.strokeStyle = "#222";
-    ctxDraw.lineWidth = 2.5;
+    ctxDraw.lineWidth = 1.5;
     ctxDraw.lineTo(p.x,p.y);
     ctxDraw.stroke();
   }
@@ -442,3 +490,5 @@ function exportPDF(){
   pdf.addImage(imgData,"PNG",0,0,exportCanvas.width,exportCanvas.height);
   pdf.save("mapa_hacienda.pdf");
 }
+
+
