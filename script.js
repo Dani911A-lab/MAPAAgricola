@@ -8,6 +8,9 @@ const ctxText = canvasText.getContext("2d");
 const img = document.getElementById("mapa");
 const mapWrapper = document.getElementById("mapWrapper");
 
+// ================= MAP SELECTOR =================
+const mapSelect = document.getElementById("mapSelect");
+
 // ================= HERRAMIENTAS =================
 const textBtn   = document.getElementById("textTool");
 const penBtn    = document.getElementById("penTool");
@@ -33,20 +36,14 @@ let resizeCorner = null;
 
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
-
-  // 1. Medidas REALES de la imagen visible
   const imgRect = img.getBoundingClientRect();
   const wrapRect = mapWrapper.getBoundingClientRect();
 
-  // 2. Tamaño EXACTO del canvas = tamaño de la imagen
   [canvasDraw, canvasText].forEach(c => {
     c.width  = imgRect.width;
     c.height = imgRect.height;
-
     c.style.width  = imgRect.width + "px";
     c.style.height = imgRect.height + "px";
-
-    // 3. Posición REAL de la imagen dentro del wrapper
     c.style.left = (imgRect.left - wrapRect.left) + "px";
     c.style.top  = (imgRect.top  - wrapRect.top ) + "px";
   });
@@ -56,6 +53,30 @@ window.addEventListener("resize", resizeCanvas);
 img.addEventListener("load", resizeCanvas);
 resizeCanvas();
 
+// ================= CAMBIO DE MAPA =================
+function changeMap(mapName){
+  img.src = `img/${mapName}.png`;
+
+  ctxDraw.clearRect(0,0,canvasDraw.width,canvasDraw.height);
+  ctxText.clearRect(0,0,canvasText.width,canvasText.height);
+
+  texts = [];
+  activeText = null;
+  drawing = false;
+
+  scale = 1;
+  offsetX = 0;
+  offsetY = 0;
+  applyTransform();
+}
+
+mapSelect.addEventListener("change", e=>{
+  changeMap(e.target.value);
+});
+
+window.addEventListener("load", ()=>{
+  changeMap("maria");
+});
 
 // ================= TOGGLE HERRAMIENTAS =================
 function toggleTool(selectedTool, btn){
@@ -75,12 +96,10 @@ function toggleTool(selectedTool, btn){
   addingText = false;
 }
 
-// Botones toggle
 penBtn.addEventListener("click", ()=> toggleTool("pen", penBtn));
 markerBtn.addEventListener("click", ()=> toggleTool("marker", markerBtn));
 eraserBtn.addEventListener("click", ()=> toggleTool("eraser", eraserBtn));
 
-// Texto independiente
 textBtn.addEventListener("click", ()=>{
   tool = "text";
   addingText = true;
@@ -97,13 +116,10 @@ let offsetY = 0;
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-
   const x = (p.clientX - rect.left) * (canvasDraw.width / rect.width);
   const y = (p.clientY - rect.top)  * (canvasDraw.height / rect.height);
-
   return { x, y };
 }
-
 
 // ================= TEXTO =================
 function measureTextBox(t){
@@ -144,11 +160,9 @@ function getHandleAt(p, box){
 function start(e){
   const p = getPos(e);
 
-  // Vista previa del borrador
-if(tool === "eraser" && !drawing){
-  drawEraserPreview(p);
-}
-
+  if(tool === "eraser" && !drawing){
+    drawEraserPreview(p);
+  }
 
   if(tool === "text"){
     const hit = getTextAt(p);
@@ -269,18 +283,6 @@ function end(){
   draggingText = false;
   resizeCorner = null;
   ctxDraw.globalCompositeOperation="source-over";
-}
-
-// ================= DIBUJAR TEXTO =================
-function end(){
-  drawing = false;
-  resizing = false;
-  draggingText = false;
-  resizeCorner = null;
-
-  ctxDraw.globalCompositeOperation="source-over";
-
-  // Limpiar preview del borrador
   redrawTextCanvas();
 }
 
@@ -293,8 +295,6 @@ function drawText(t){
   ctxText.fillText(t.text, t.x, t.y);
   ctxText.restore();
 }
-
-
 
 // ================= REDRAW =================
 function redrawTextCanvas(){
@@ -386,11 +386,8 @@ mapWrapper.addEventListener("touchend", e=>{
 
 function drawEraserPreview(p){
   ctxText.clearRect(0,0,canvasText.width,canvasText.height);
-
-  redrawTextCanvas(); // mantiene textos visibles
-
+  redrawTextCanvas();
   const s = Number(sizeInput.value);
-
   ctxText.save();
   ctxText.beginPath();
   ctxText.arc(p.x, p.y, s/2, 0, Math.PI*2);
@@ -407,61 +404,24 @@ const downloadBtn = document.getElementById("downloadBtn");
 downloadBtn.addEventListener("click", exportPDF);
 
 function exportPDF(){
-
-  // Canvas final REAL (sin zoom ni pan)
   const exportCanvas = document.createElement("canvas");
   const ctx = exportCanvas.getContext("2d");
 
-  // Tamaño real del mapa
   exportCanvas.width = img.naturalWidth;
   exportCanvas.height = img.naturalHeight;
 
-  // Dibujar mapa base
-  ctx.drawImage(
-    img,
-    0, 0,
-    exportCanvas.width,
-    exportCanvas.height
-  );
+  ctx.drawImage(img,0,0,exportCanvas.width,exportCanvas.height);
+  ctx.drawImage(canvasDraw,0,0,canvasDraw.width,canvasDraw.height,0,0,exportCanvas.width,exportCanvas.height);
+  ctx.drawImage(canvasText,0,0,canvasText.width,canvasText.height,0,0,exportCanvas.width,exportCanvas.height);
 
-  // Dibujar lo pintado (alineado)
-  ctx.drawImage(
-    canvasDraw,
-    0, 0,
-    canvasDraw.width, canvasDraw.height,
-    0, 0,
-    exportCanvas.width, exportCanvas.height
-  );
-
-  // Dibujar textos
-  ctx.drawImage(
-    canvasText,
-    0, 0,
-    canvasText.width, canvasText.height,
-    0, 0,
-    exportCanvas.width, exportCanvas.height
-  );
-
-  // Convertir a imagen
   const imgData = exportCanvas.toDataURL("image/png");
 
-  // PDF tamaño exacto de la imagen
   const pdf = new jspdf.jsPDF({
     orientation: exportCanvas.width > exportCanvas.height ? "landscape" : "portrait",
     unit: "px",
     format: [exportCanvas.width, exportCanvas.height]
   });
 
-  pdf.addImage(
-    imgData,
-    "PNG",
-    0,
-    0,
-    exportCanvas.width,
-    exportCanvas.height
-  );
-
-  // Descarga directa (móvil y desktop)
+  pdf.addImage(imgData,"PNG",0,0,exportCanvas.width,exportCanvas.height);
   pdf.save("mapa_hacienda.pdf");
 }
-
