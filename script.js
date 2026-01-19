@@ -284,6 +284,17 @@ function end(){
   redrawTextCanvas();
 }
 
+// ================= DIBUJAR TEXTO =================
+function drawText(t){
+  ctxText.save();
+  ctxText.font = `${t.size}px Arial`;
+  ctxText.fillStyle = t.color;
+  ctxText.textBaseline = "top";
+  ctxText.fillText(t.text, t.x, t.y);
+  ctxText.restore();
+}
+
+
 
 // ================= REDRAW =================
 function redrawTextCanvas(){
