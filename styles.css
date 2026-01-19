@@ -153,3 +153,33 @@ canvas{
   align-items:center;
 }
 
+
+.map-selector{
+  position: fixed;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 100;
+}
+
+.map-selector label{
+  font-size: 12px;
+  font-weight: 700;
+  color: #444;
+}
+
+.map-selector select{
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ddd;
+}
+
+
