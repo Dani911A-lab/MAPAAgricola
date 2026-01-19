@@ -155,31 +155,82 @@ canvas{
 
 
 .map-selector{
-  position: fixed;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #ffffff;
-  padding: 10px 12px;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,.12);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 100;
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  padding:4px 6px;
+  background:rgba(255,255,255,.85);
+  border-radius:10px;
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+  backdrop-filter: blur(6px);
 }
 
 .map-selector label{
-  font-size: 12px;
-  font-weight: 700;
-  color: #444;
+  font-size:11px;
+  font-weight:700;
+  color:#444;
 }
 
 .map-selector select{
-  border-radius: 10px;
-  padding: 6px 8px;
-  font-size: 13px;
-  border: 1px solid #ddd;
+  border-radius:8px;
+  padding:4px 6px;
+  font-size:12px;
+  border:1px solid #ddd;
 }
+
+
+/* ================= MAP SELECTOR ICON ================= */
+
+.map-selector-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Botón tipo icono (casa) */
+#mapToggleBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover / activo */
+#mapToggleBtn:hover {
+  background: #f2f2f2;
+}
+
+#mapToggleBtn:active {
+  transform: scale(0.96);
+}
+
+/* Select completamente invisible */
+#mapSelect {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42px;
+  height: 42px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ================= TOOLBOX AJUSTE ================= */
+
+.toolbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
 
 
