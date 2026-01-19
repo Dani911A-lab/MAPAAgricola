@@ -232,5 +232,27 @@ canvas{
   flex-wrap: nowrap;
 }
 
+.map-selector-icon {
+  position: relative;
+  display: inline-block;
+  margin-right: 8px; /* espacio entre iconos */
+}
+
+.map-selector-icon img {
+  width: 32px;   /* mismo tamaño que los iconos de la toolbox */
+  height: 32px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.map-selector-icon select {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  opacity: 0;    /* select oculto */
+  cursor: pointer;
+}
 
 
