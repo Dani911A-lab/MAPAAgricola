@@ -33,22 +33,29 @@ let resizeCorner = null;
 
 // ================= RESIZE CANVAS =================
 function resizeCanvas(){
-  const rect = img.getBoundingClientRect();
-  [canvasDraw, canvasText].forEach(c=>{
-    c.width = rect.width;
-    c.height = rect.height;
-    c.style.width = rect.width + "px";
-    c.style.height = rect.height + "px";
 
-    // IMPORTANTE: anclar al wrapper
-    c.style.top = "0px";
-    c.style.left = "0px";
+  // 1. Medidas REALES de la imagen visible
+  const imgRect = img.getBoundingClientRect();
+  const wrapRect = mapWrapper.getBoundingClientRect();
+
+  // 2. Tamaño EXACTO del canvas = tamaño de la imagen
+  [canvasDraw, canvasText].forEach(c => {
+    c.width  = imgRect.width;
+    c.height = imgRect.height;
+
+    c.style.width  = imgRect.width + "px";
+    c.style.height = imgRect.height + "px";
+
+    // 3. Posición REAL de la imagen dentro del wrapper
+    c.style.left = (imgRect.left - wrapRect.left) + "px";
+    c.style.top  = (imgRect.top  - wrapRect.top ) + "px";
   });
 }
 
 window.addEventListener("resize", resizeCanvas);
-img.onload = resizeCanvas;
+img.addEventListener("load", resizeCanvas);
 resizeCanvas();
+
 
 // ================= TOGGLE HERRAMIENTAS =================
 function toggleTool(selectedTool, btn){
