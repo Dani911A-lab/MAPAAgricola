@@ -173,7 +173,7 @@ if(tool === "eraser" && !drawing){
           x: p.x,
           y: p.y,
           size: Number(sizeInput.value)+6,
-          color: colorInput.value
+          color: "#000"
         });
         redrawTextCanvas();
       }
