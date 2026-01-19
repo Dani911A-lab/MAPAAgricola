@@ -97,10 +97,13 @@ let offsetY = 0;
 function getPos(e){
   const rect = canvasDraw.getBoundingClientRect();
   const p = e.touches ? e.touches[0] : e;
-  const x = (p.clientX - rect.left)/scale;
-  const y = (p.clientY - rect.top)/scale;
-  return {x, y};
+
+  const x = (p.clientX - rect.left) * (canvasDraw.width / rect.width);
+  const y = (p.clientY - rect.top)  * (canvasDraw.height / rect.height);
+
+  return { x, y };
 }
+
 
 // ================= TEXTO =================
 function measureTextBox(t){
