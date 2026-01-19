@@ -10,11 +10,21 @@
 <body>
 <div id="mapWrapper" class="map-wrapper">
   <div id="mapInner">
-    <img src="img/mapa.png" id="mapa" class="mapa">
+    <img src="img/maria.png" id="mapa" class="mapa">
+    <img src="img/esperanza.png" id="mapa" class="mapa">
     <canvas id="drawCanvas"></canvas>
     <canvas id="textCanvas"></canvas>
   </div>
 </div>
+
+<div class="map-selector">
+  <label>Mapa</label>
+  <select id="mapSelect">
+    <option value="maria" selected>MARIA</option>
+    <option value="esperanza">ESPERANZA</option>
+  </select>
+</div>
+
 
 <div class="toolbox">
   <button id="textTool" title="Texto">🅰️</button>
