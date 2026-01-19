@@ -24,18 +24,15 @@
 <!-- ================= TOOLBOX ================= -->
 <div class="toolbox">
 
-  <!-- SELECTOR COMO ICONO -->
+  <!-- SELECTOR COMO IMAGEN -->
   <div class="map-selector-icon">
-    <button id="mapToggleBtn" title="Cambiar mapa">
-      🏠
-    </button>
+    <img src="img/mapa.png" id="mapToggleImg" title="Cambiar mapa">
 
-    <!-- SELECT OCULTO (SE ABRE AL PULSAR EL ICONO) -->
+    <!-- SELECT OCULTO (SE ABRE AL PULSAR LA IMAGEN) -->
     <select id="mapSelect">
-      <option value="maria">MARIA</option>
+      <option value="maria" selected>MARIA</option>
       <option value="esperanza">ESPERANZA</option>
       <option value="estrellita">ESTRELLITA</option>
-      <option value="primavera">PRIMAVERA</option>
     </select>
   </div>
 
@@ -64,6 +61,7 @@
 
 </div>
 
+
 <!-- ================= LIBRERÍA PDF ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -83,5 +81,3 @@
 
 </body>
 </html>
-
-
