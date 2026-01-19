@@ -8,15 +8,20 @@
 </head>
 
 <body>
+
+<!-- ================= MAPA ================= -->
 <div id="mapWrapper" class="map-wrapper">
   <div id="mapInner">
+    <!-- ✅ UN SOLO MAPA (SE CAMBIA POR SRC DESDE JS) -->
     <img src="img/maria.png" id="mapa" class="mapa">
-    <img src="img/esperanza.png" id="mapa" class="mapa">
+
+    <!-- CANVAS -->
     <canvas id="drawCanvas"></canvas>
     <canvas id="textCanvas"></canvas>
   </div>
 </div>
 
+<!-- ================= SELECTOR DE MAPA ================= -->
 <div class="map-selector">
   <label>Mapa</label>
   <select id="mapSelect">
@@ -25,7 +30,7 @@
   </select>
 </div>
 
-
+<!-- ================= TOOLBOX ================= -->
 <div class="toolbox">
   <button id="textTool" title="Texto">🅰️</button>
 
@@ -49,11 +54,11 @@
   <input type="range" id="markerSize" min="8" max="40" value="18" title="Grosor">
 </div>
 
-
-
-<!-- jsPDF (solo agregado, no interfiere con nada) -->
+<!-- ================= LIBRERÍA PDF ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
+
 </body>
 </html>
