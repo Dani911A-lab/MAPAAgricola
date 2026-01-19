@@ -12,46 +12,54 @@
 <!-- ================= MAPA ================= -->
 <div id="mapWrapper" class="map-wrapper">
   <div id="mapInner">
-    <!-- ✅ UN SOLO MAPA (SE CAMBIA POR SRC DESDE JS) -->
+
     <img src="img/maria.png" id="mapa" class="mapa">
 
-    <!-- CANVAS -->
     <canvas id="drawCanvas"></canvas>
     <canvas id="textCanvas"></canvas>
-  </div>
-</div>
 
-<!-- ================= SELECTOR DE MAPA ================= -->
-<div class="map-selector">
-  <label>Mapa</label>
-  <select id="mapSelect">
-    <option value="maria" selected>MARIA</option>
-    <option value="esperanza">ESPERANZA</option>
-  </select>
+  </div>
 </div>
 
 <!-- ================= TOOLBOX ================= -->
 <div class="toolbox">
+
+  <!-- SELECTOR COMO ICONO -->
+  <div class="map-selector-icon">
+    <button id="mapToggleBtn" title="Cambiar mapa">
+      🏠
+    </button>
+
+    <!-- SELECT OCULTO (SE ABRE AL PULSAR EL ICONO) -->
+    <select id="mapSelect">
+      <option value="maria">MARIA</option>
+      <option value="esperanza">ESPERANZA</option>
+    </select>
+  </div>
+
+  <!-- TEXTO -->
   <button id="textTool" title="Texto">🅰️</button>
 
+  <!-- LÁPIZ -->
   <button id="penTool" title="Lápiz">
     <img src="img/lapiz.png" class="tool-icon">
   </button>
 
+  <!-- RESALTADOR -->
   <button id="markerTool" title="Resaltador">
     <img src="img/resaltador.png" class="tool-icon">
   </button>
 
+  <!-- BORRADOR -->
   <button id="eraserTool" title="Borrador">
     <img src="img/borrador.png" class="tool-icon">
   </button>
 
-  <button id="downloadBtn" title="Descargar PDF">
-    <img src="img/descarga.png" class="tool-icon">
-  </button>
 
+  <!-- AJUSTES -->
   <input type="color" id="markerColor" value="#ffeb3b" title="Color">
   <input type="range" id="markerSize" min="8" max="40" value="18" title="Grosor">
+
 </div>
 
 <!-- ================= LIBRERÍA PDF ================= -->
@@ -59,6 +67,17 @@
 
 <!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
+
+<!-- ================= TOGGLE SELECT ================= -->
+<script>
+  const mapToggleBtn = document.getElementById("mapToggleBtn");
+  const mapSelect = document.getElementById("mapSelect");
+
+  mapToggleBtn.addEventListener("click", () => {
+    mapSelect.focus();
+    mapSelect.click();
+  });
+</script>
 
 </body>
 </html>
