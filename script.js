@@ -335,6 +335,8 @@ function move(e){
 
   if(tool === "eraser"){
     const s = Number(sizeInput.value);
+
+    // borrar textos bajo cursor
     for(let i = texts.length-1; i>=0; i--){
       const b = measureTextBox(texts[i]);
       if(p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h){
@@ -342,14 +344,20 @@ function move(e){
         redrawTextCanvas();
       }
     }
+
+    // borrar dibujo
     ctxDraw.save();
     ctxDraw.globalCompositeOperation="destination-out";
     ctxDraw.lineWidth = s;
     ctxDraw.lineTo(p.x, p.y);
     ctxDraw.stroke();
     ctxDraw.restore();
+
+    // 🔹 dibujar bolita del borrador siguiendo el cursor
+    drawEraserPreview(p);
   }
 }
+
 
 // ================= END =================
 function end(){
